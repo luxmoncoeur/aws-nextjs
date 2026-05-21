@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Serverless Image Uploader
 
-## Getting Started
+A Next.js application that uses AWS S3 pre-signed URLs to securely stream and upload image files directly from the browser.
 
-First, run the development server:
+**Live Demo:** [https://dvjeq9wk5xcfb.cloudfront.net](https://dvjeq9wk5xcfb.cloudfront.net)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## How It Works
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Next.js Backend (AWS Lambda):** Generates a secure, temporary upload link (pre-signed URL) on demand.
+- **React Frontend:** Intercepts the link and streams the file binary directly into **Amazon S3**.
+- **CloudFront CDN:** Caches the app and serves it globally with minimal latency.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Today I Learned
 
-To learn more about Next.js, take a look at the following resources:
+### 1. AWS Account & IAM Setup
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Before writing, I had to configure my local machine with the AWS CLI and an IAM user with programmatic access credentials.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 2. Preventing Runtime Crashes
 
-## Deploy on Vercel
+- Submitting the form without selecting a file immediately broke the app with a `null is not an object` crash on `file.type`. Adding a simple JavaScript defensive guard clause (`if (!file) return;`) completely fixed this user error.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 3. Navigating the AWS Dashboard
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- AWS is isolated by global geographic regions. When I logged into the console, it looked completely empty until I switched my region filter dropdown to **Sydney (`ap-southeast-2`)**, which instantly surfaced my live S3 buckets.
+
+---
+
+## Future Study Goals
+
+To build on this project and master full-stack cloud development, my next goals are:
+
+- Learn how the core blocks of cloud computing work behind the scenes—specifically looking into VPC networking layers, IAM roles/policies, and database management.
+- Build more features on top of this stack, like adding user authentication (Cognito) or creating a gallery page to read and display the images stored inside the S3 bucket.
+- Rebuild and deploy this application or a similar stack using Docker and AWS ECS Fargate to practice shipping apps inside lightweight container environments instead of raw serverless functions.
+
+---
+
+## 🚀 Quick Commands
+
+- **Run Local Sandbox:** `npx sst dev`
+- **Deploy Global Production:** `npx sst deploy --stage production`
