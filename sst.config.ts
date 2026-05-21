@@ -14,6 +14,6 @@ export default $config({
       access: "public",
     });
 
-    new sst.aws.Nextjs("MyWeb");
+    new sst.aws.Nextjs("MyWeb", { link: [bucket] });
   },
 });
