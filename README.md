@@ -40,7 +40,7 @@ To build on this project and master full-stack cloud development, my next goals 
 
 ---
 
-## 🚀 Quick Commands
+## Quick Commands
 
 - **Run Local Sandbox:** `npx sst dev`
 - **Deploy Global Production:** `npx sst deploy --stage production`
