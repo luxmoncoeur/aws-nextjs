@@ -6,17 +6,25 @@ import Form from "@/components/form";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const command = new PutObjectCommand({
-    Key: crypto.randomUUID(),
-    Bucket: Resource.MyBucket.name,
-  });
+  async function getUploadUrl(fileName: string, fileType: string) {
+    "use server";
 
-  const url = await getSignedUrl(new S3Client({}), command);
+    const command = new PutObjectCommand({
+      Key: crypto.randomUUID(),
+      Bucket: Resource.MyBucket.name,
+      ContentType: fileType,
+    });
+
+    const s3Client = new S3Client({});
+    const url = await getSignedUrl(s3Client, command);
+
+    return url;
+  }
 
   return (
     <div style={{ padding: "2rem" }}>
       <main style={{ maxWidth: "600px", margin: "0 auto" }}>
-        <Form url={url} />
+        <Form getUploadUrl={getUploadUrl} />
       </main>
     </div>
   );

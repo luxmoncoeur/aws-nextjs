@@ -1,6 +1,6 @@
-# Serverless Image Uploader
+# Serverless File Uploader
 
-A Next.js application that uses AWS S3 pre-signed URLs to securely stream and upload image files directly from the browser.
+A Next.js application that uses AWS S3 pre-signed URLs to securely stream and upload files directly from the browser.
 
 **Live Demo:** [https://dvjeq9wk5xcfb.cloudfront.net](https://dvjeq9wk5xcfb.cloudfront.net)
 

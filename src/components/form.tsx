@@ -2,7 +2,11 @@
 
 import styles from "./form.module.css";
 
-export default function Form({ url }: { url: string }) {
+interface FormProps {
+  getUploadUrl: (fileName: string, fileType: string) => Promise<string>;
+}
+
+export default function Form({ getUploadUrl }: FormProps) {
   return (
     <form
       className={styles.formCard}
@@ -12,20 +16,30 @@ export default function Form({ url }: { url: string }) {
         const file = (e.target as HTMLFormElement).file.files?.[0] ?? null;
 
         if (!file) {
-          alert("Please select an image file first!");
+          alert("Please select a file first!");
           return;
         }
 
-        const image = await fetch(url, {
-          body: file,
-          method: "PUT",
-          headers: {
-            "Content-Type": file.type,
-            "Content-Disposition": `attachment; filename="${file.name}"`,
-          },
-        });
+        try {
+          const presignedUrl = await getUploadUrl(file.name, file.type);
+          const response = await fetch(presignedUrl, {
+            body: file,
+            method: "PUT",
+            headers: {
+              "Content-Type": file.type,
+              "Content-Disposition": `attachment; filename="${file.name}"`,
+            },
+          });
 
-        window.location.href = image.url.split("?")[0];
+          if (response.ok) {
+            window.location.href = presignedUrl.split("?")[0];
+          } else {
+            alert("Upload to S3 failed");
+          }
+        } catch (error) {
+          console.error(error);
+          alert("An error occured during the upload");
+        }
       }}
     >
       <div>
@@ -37,21 +51,16 @@ export default function Form({ url }: { url: string }) {
             marginBottom: "0.25rem",
           }}
         >
-          Upload Image
+          Upload Any File
         </h2>
         <p style={{ fontSize: "0.875rem", color: "#64748b" }}>
-          Securely stream your photos straight into Amazon S3.
+          Securely stream your files straight into Amazon S3.
         </p>
       </div>
 
       <div className={styles.dropzone}>
         <span style={{ fontSize: "1.5rem" }}></span>
-        <input
-          name="file"
-          type="file"
-          accept="image/png, image/jpeg"
-          className={styles.fileInput}
-        />
+        <input name="file" type="file" className={styles.fileInput} />
       </div>
 
       <button type="submit" className={styles.uploadButton}>
