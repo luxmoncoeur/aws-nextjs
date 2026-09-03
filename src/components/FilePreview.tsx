@@ -1,60 +1,58 @@
-import React from "react";
+"use client";
+
 import { useEffect, useState } from "react";
 
 interface FilePreviewProps {
   file: File;
 }
 
-const FilePreview: React.FC<FilePreviewProps> = ({ file }) => {
+export default function FilePreview({ file }: FilePreviewProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      setPreviewUrl(null);
-    }
+    // Object URLs stream from disk instead of loading the whole file into
+    // memory like a base64 data URL would.
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
   }, [file]);
 
   if (!previewUrl) return null;
 
-  switch (file.type) {
-    case "audio/mpeg":
-    case "audio/wav":
-    case "audio/ogg":
-      return <audio controls src={previewUrl} />;
-    case "image/jpeg":
-    case "image/png":
-    case "image/gif":
-      return (
-        <img
-          src={previewUrl}
-          alt="Preview"
-          className="max-h-screen max-w-full"
-        />
-      );
-    case "application/pdf":
-      return (
-        <iframe
-          title="PDF Preview"
-          src={`${previewUrl}?#view=fitH`}
-          className="w-full h-full border rounded-lg"
-        />
-      );
-    default:
-      return (
-        <pre
-          className="bg-gray-800 text-white p-4 
-overflow-x-auto"
-        >
-          {file.name}
-        </pre>
-      );
+  if (file.type.startsWith("image/")) {
+    return (
+      <img
+        src={previewUrl}
+        alt={`Preview of ${file.name}`}
+        className="max-h-64 w-auto rounded-lg border border-slate-200"
+      />
+    );
   }
-};
-
-export default FilePreview;
+  if (file.type.startsWith("audio/")) {
+    return <audio controls src={previewUrl} className="w-full" />;
+  }
+  if (file.type.startsWith("video/")) {
+    return (
+      <video
+        controls
+        src={previewUrl}
+        className="max-h-64 w-full rounded-lg border border-slate-200"
+      />
+    );
+  }
+  if (file.type === "application/pdf") {
+    return (
+      <iframe
+        title={`Preview of ${file.name}`}
+        src={`${previewUrl}#view=fitH`}
+        className="h-64 w-full rounded-lg border border-slate-200"
+      />
+    );
+  }
+  return (
+    <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600">
+      {file.name}{" "}
+      <span className="text-slate-400">({file.type || "unknown type"})</span>
+    </div>
+  );
+}
